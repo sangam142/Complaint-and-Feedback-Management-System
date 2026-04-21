@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Complaints — CFS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar(${user})}"></div>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<div class="container">
+    <h2 style="margin-bottom:1rem;">Manage Complaints</h2>
+
+    <!-- Filter by status -->
+    <div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+        <span style="font-size:0.85rem; font-weight:600; color:#6b7280;">Filter:</span>
+        <a href="/admin/complaints" class="btn btn-sm" th:classappend="${filterStatus == null} ? 'btn-primary' : 'btn-secondary'">All</a>
+        <a th:each="s : ${statuses}" th:href="@{/admin/complaints(status=${s})}"
+           class="btn btn-sm" th:classappend="${filterStatus != null && filterStatus.name() == s.name()} ? 'btn-primary' : 'btn-secondary'"
+           th:text="${s}">STATUS</a>
+    </div>
+
+    <div class="card">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Customer</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${complaints}">
+                    <td th:text="${c.complaintId}" style="font-size:0.8rem;">CMP</td>
+                    <td th:text="${c.title}">Title</td>
+                    <td th:text="${c.customer.fullName}">Customer</td>
+                    <td th:text="${c.category}" style="font-size:0.8rem;">CAT</td>
+                    <td><span th:class="'priority-' + ${c.priority}" th:text="${c.priority}">MED</span></td>
+                    <td><span th:class="'status status-' + ${c.status}" th:text="${c.status}">OPEN</span></td>
+                    <td th:text="${c.assignedStaff != null ? c.assignedStaff.fullName : '—'}">Staff</td>
+                    <td>
+                        <div class="action-group">
+                            <!-- Assign (for OPEN complaints) -->
+                            <div th:if="${c.status.name() == 'OPEN' || c.status.name() == 'REOPENED' || c.status.name() == 'ESCALATED'}">
+                                <form th:action="@{/admin/complaints/{id}/assign(id=${c.id})}" method="post"
+                                      style="display:flex; gap:4px; align-items:center;">
+                                    <select name="staffId" class="form-control" style="padding:4px; font-size:0.8rem; width:auto;">
+                                        <option th:each="s : ${staffList}" th:value="${s.id}" th:text="${s.fullName}">Staff</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary">Assign</button>
+                                </form>
+                                <form th:action="@{/admin/complaints/{id}/auto-assign(id=${c.id})}" method="post" class="inline-form" style="margin-top:4px;">
+                                    <button type="submit" class="btn btn-sm btn-success">Auto-Assign</button>
+                                </form>
+                            </div>
+                            <!-- Escalate (for IN_PROGRESS) -->
+                            <form th:if="${c.status.name() == 'IN_PROGRESS'}"
+                                  th:action="@{/admin/complaints/{id}/escalate(id=${c.id})}" method="post" class="inline-form">
+                                <button type="submit" class="btn btn-sm btn-danger">Escalate</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(complaints)}">
+                    <td colspan="8" style="text-align:center; color:#9ca3af; padding:2rem;">No complaints found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

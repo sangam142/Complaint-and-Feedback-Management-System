@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error — Complaint & Feedback System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); min-height: 100vh; display: flex; align-items: center; }
+        .auth-container { margin: auto; }
+        .error-icon { font-size: 3rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+<div class="auth-container">
+    <div class="auth-card" style="text-align:center; border: 2px solid #fee2e2;">
+        <div class="error-icon">⚠️</div>
+        <h2 style="color: #dc2626; margin-bottom:0.5rem;">Something went wrong</h2>
+        <p th:text="${error}" style="color:#dc2626; margin:1rem 0; font-weight:600; font-size:1.1rem;">An error occurred.</p>
+        <p th:if="${message}" th:text="${message}" style="color:#6b7280; font-size:0.95rem; margin:0.75rem 0;"></p>
+        <a href="/dashboard/home" class="btn btn-primary" style="margin-top:2rem;">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+</body>
+</html>

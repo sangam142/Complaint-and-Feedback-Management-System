@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications — CFS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar(${user})}"></div>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<div class="container">
+    <h2 style="margin-bottom:1rem;">🔔 Notifications</h2>
+    <a href="/dashboard/home" style="font-size:0.85rem;">← Back to Dashboard</a>
+
+    <div class="card" style="margin-top:1rem;">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Message</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="n : ${notifications}">
+                    <td th:text="${n.title}" style="font-weight:600;">Title</td>
+                    <td th:text="${n.message}" style="font-size:0.85rem;">Message</td>
+                    <td>
+                        <span th:class="'status status-' + ${n.status}" th:text="${n.status}">STATUS</span>
+                    </td>
+                    <td th:text="${#temporals.format(n.createdAt, 'dd-MMM HH:mm')}">01-Jan</td>
+                    <td class="action-group">
+                        <form th:if="${n.status.name() == 'DELIVERED' || n.status.name() == 'UNREAD'}"
+                              th:action="@{/{base}/notifications/{id}/read(base=${user.role.name() == 'CUSTOMER' ? 'customer' : (user.role.name() == 'ADMIN' ? 'admin' : 'staff')}, id=${n.id})}"
+                              method="post" class="inline-form">
+                            <button type="submit" class="btn btn-sm btn-primary">Mark Read</button>
+                        </form>
+                        <form th:if="${n.status.name() == 'READ' || n.status.name() == 'UNREAD'}"
+                              th:action="@{/customer/notifications/{id}/archive(id=${n.id})}"
+                              method="post" class="inline-form"
+                              sec:authorize="hasRole('CUSTOMER')">
+                            <button type="submit" class="btn btn-sm btn-secondary">Archive</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(notifications)}">
+                    <td colspan="5" style="text-align:center; color:#9ca3af; padding:2rem;">
+                        No notifications yet.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

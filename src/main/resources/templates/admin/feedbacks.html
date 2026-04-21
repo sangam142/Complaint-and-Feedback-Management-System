@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Feedbacks — CFS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar(${user})}"></div>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<div class="container">
+    <h2 style="margin-bottom:1rem;">Review Feedbacks</h2>
+
+    <div class="card">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Rating</th>
+                    <th>Content</th>
+                    <th>Complaint</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="f : ${feedbacks}">
+                    <td th:text="${f.id}">1</td>
+                    <td th:text="${f.user.fullName}">User</td>
+                    <td th:text="${f.feedbackType}">TYPE</td>
+                    <td>
+                        <span class="stars" th:if="${f.rating != null}">
+                            <span th:each="i : ${#numbers.sequence(1, f.rating)}">★</span>
+                        </span>
+                        <span th:if="${f.rating == null}">—</span>
+                    </td>
+                    <td style="max-width:250px;" th:text="${f.content}">Content</td>
+                    <td th:text="${f.complaint != null ? f.complaint.complaintId : '—'}">CMP</td>
+                    <td><span th:class="'status status-' + ${f.status}" th:text="${f.status}">STATUS</span></td>
+                    <td class="action-group">
+                        <div th:if="${f.status.name() == 'SUBMITTED'}">
+                            <form th:action="@{/admin/feedbacks/{id}/review(id=${f.id})}" method="post" class="inline-form">
+                                <input type="hidden" name="approved" value="true">
+                                <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                            </form>
+                            <form th:action="@{/admin/feedbacks/{id}/review(id=${f.id})}" method="post" class="inline-form">
+                                <input type="hidden" name="approved" value="false">
+                                <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                            </form>
+                        </div>
+                        <span th:if="${f.status.name() != 'SUBMITTED'}" style="color:#9ca3af; font-size:0.8rem;">Reviewed</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(feedbacks)}">
+                    <td colspan="8" style="text-align:center; color:#9ca3af; padding:2rem;">No feedbacks yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

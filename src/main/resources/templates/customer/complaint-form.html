@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Complaint — CFS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar(${null})}"></div>
+
+<div class="container">
+    <div class="card" style="max-width:700px; margin:0 auto;">
+        <div class="card-title">Submit New Complaint</div>
+
+        <form th:action="@{/customer/complaints/new}" method="post" th:object="${complaint}">
+            <div class="form-group">
+                <label for="title">Complaint Title *</label>
+                <input type="text" id="title" th:field="*{title}" class="form-control"
+                       placeholder="Brief title for your complaint" required>
+                <small th:if="${#fields.hasErrors('title')}" th:errors="*{title}"
+                       style="color:#dc2626; font-size:0.8rem;"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select id="category" th:field="*{category}" class="form-control" required>
+                    <option value="">— Select Category —</option>
+                    <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}">CAT</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select id="priority" th:field="*{priority}" class="form-control">
+                    <option th:each="p : ${priorities}" th:value="${p}" th:text="${p}"
+                            th:selected="${p.name() == 'MEDIUM'}">PRIORITY</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" th:field="*{description}" class="form-control" rows="5"
+                          placeholder="Describe your complaint in detail..." required></textarea>
+                <small th:if="${#fields.hasErrors('description')}" th:errors="*{description}"
+                       style="color:#dc2626; font-size:0.8rem;"></small>
+            </div>
+
+            <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+                <button type="submit" class="btn btn-primary">Submit Complaint</button>
+                <a href="/dashboard/home" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

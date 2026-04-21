@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Complaint & Feedback System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar(${user})}"></div>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">👨‍💼 Admin Dashboard</h1>
+            <p style="color: #6b7280; font-size: 0.95rem;">System overview and management</p>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card" th:each="entry : ${statusCounts}">
+            <div class="stat-value" th:text="${entry.value}">0</div>
+            <div class="stat-label" th:text="${entry.key}">STATUS</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${avgRating != null ? #numbers.formatDecimal(avgRating, 1, 1) : 'N/A'}">4.2</div>
+            <div class="stat-label">⭐ Avg Rating</div>
+        </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <a href="/admin/complaints" class="btn btn-primary">📋 Manage Complaints</a>
+        <a href="/admin/users" class="btn btn-secondary">👥 Manage Users</a>
+        <a href="/admin/feedbacks" class="btn btn-secondary">💬 Review Feedbacks</a>
+        <a href="/admin/reports" class="btn btn-warning">📈 Generate Reports</a>
+    </div>
+
+    <!-- Recent complaints -->
+    <div class="card">
+        <div class="card-title">📋 Recent Complaints</div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Customer</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Filed</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c, iter : ${allComplaints}" th:if="${iter.index < 10}">
+                    <td style="font-weight: 600;" th:text="${c.complaintId}">CMP</td>
+                    <td th:text="${c.title}">Title</td>
+                    <td th:text="${c.customer.fullName}">Customer</td>
+                    <td th:text="${c.category}">CAT</td>
+                    <td><span th:class="'priority-' + ${c.priority}" style="font-weight: 700;" th:text="${c.priority}">MED</span></td>
+                    <td><span th:class="'status status-' + ${c.status}" th:text="${c.status}">OPEN</span></td>
+                    <td th:text="${#temporals.format(c.createdAt, 'dd-MMM-yyyy')}">Date</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(allComplaints)}">
+                    <td colspan="7" style="text-align:center; color:#6b7280; padding:2rem;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📭</div>
+                        No complaints available.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

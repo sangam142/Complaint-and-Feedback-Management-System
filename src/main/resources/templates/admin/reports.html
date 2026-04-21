@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports — CFS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar(${user})}"></div>
+
+<div class="container">
+    <h2 style="margin-bottom:1rem;">Reports &amp; Analytics</h2>
+
+    <!-- Summary stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" th:text="${totalComplaints}">0</div>
+            <div class="stat-label">Total Complaints</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${avgRating != null ? #numbers.formatDecimal(avgRating, 1, 1) : 'N/A'}">4.2</div>
+            <div class="stat-label">Avg Feedback Rating</div>
+        </div>
+    </div>
+
+    <!-- Status breakdown -->
+    <div class="card">
+        <div class="card-title">Complaints by Status</div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Count</th>
+                    <th>Visual</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="entry : ${statusCounts}">
+                    <td><span th:class="'status status-' + ${entry.key}" th:text="${entry.key}">STATUS</span></td>
+                    <td th:text="${entry.value}">0</td>
+                    <td>
+                        <div style="background:#e5e7eb; border-radius:4px; height:20px; width:200px; overflow:hidden;">
+                            <div style="height:100%; border-radius:4px;"
+                                 th:style="'width:' + ${totalComplaints > 0 ? (entry.value * 100 / totalComplaints) : 0} + '%; background:#2563eb;'"></div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Category breakdown -->
+    <div class="card">
+        <div class="card-title">Complaints by Category</div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Count</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${categoryCounts}">
+                    <td th:text="${row[0]}">CATEGORY</td>
+                    <td th:text="${row[1]}">0</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(categoryCounts)}">
+                    <td colspan="2" style="text-align:center; color:#9ca3af; padding:1.5rem;">No data yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Feedback overview -->
+    <div class="card">
+        <div class="card-title">All Feedbacks</div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Rating</th>
+                    <th>Content</th>
+                    <th>Complaint</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="f : ${allFeedbacks}">
+                    <td th:text="${f.user.fullName}">User</td>
+                    <td th:text="${f.feedbackType}">TYPE</td>
+                    <td>
+                        <span class="stars" th:if="${f.rating != null}">
+                            <span th:each="i : ${#numbers.sequence(1, f.rating)}">★</span>
+                        </span>
+                        <span th:if="${f.rating == null}">—</span>
+                    </td>
+                    <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;"
+                        th:text="${f.content}">Content</td>
+                    <td th:text="${f.complaint != null ? f.complaint.complaintId : '—'}">CMP</td>
+                    <td><span th:class="'status status-' + ${f.status}" th:text="${f.status}">STATUS</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
