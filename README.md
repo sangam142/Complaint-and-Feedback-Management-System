@@ -95,25 +95,19 @@ for (ComplaintObserver observer : observers) {
 }
 ```
 
-**M3 Responsibilities (Observer Module)**
-- Define the observer contract in `ComplaintObserver` for all lifecycle hooks:
-    `onComplaintSubmitted`, `onComplaintAssigned`, `onComplaintStatusChanged`,
-    `onComplaintResolved`, `onComplaintEscalated`, `onComplaintReopened`.
-- Implement concrete side effects in `NotificationObserver` using `NotificationFactory`
-    and persist each generated notification via `NotificationRepository`.
-- Ensure admin escalation broadcast in `onComplaintEscalated` by notifying all users
-    with role `ADMIN`.
-- Wire Observer into business flow in `ComplaintServiceImpl` through
-    `List<ComplaintObserver> observers`, and notify observers after each state/event change.
-- Keep complaint workflow extensible: new observers can be added without modifying
-    complaint lifecycle methods in the service.
-
 ### 4. Strategy Pattern (Behavioral — bonus)
 **Files**: `pattern/strategy/AssignmentStrategy.java`, `RoundRobinStrategy.java`, `LoadBalancedStrategy.java`
 
 Defines interchangeable algorithms for assigning complaints to staff. The admin can switch strategies without modifying the complaint service:
 - **RoundRobinStrategy**: Assigns in sequence
 - **LoadBalancedStrategy**: Assigns to staff with fewest active complaints
+
+**M2 Responsibilities (Strategy Module)**
+- Define the strategy contract in `AssignmentStrategy` using `assignStaff(complaint, activeStaff)`.
+- Provide two interchangeable assignment algorithms:
+  `RoundRobinStrategy` for fair rotation and `LoadBalancedStrategy` for least-load assignment.
+- Select and inject the active algorithm at runtime in `ComplaintServiceImpl` using Spring `@Qualifier`.
+- Execute auto-assignment through the strategy in `autoAssignComplaint()` so service logic avoids hardcoded `if/else` assignment rules.
 
 ### 5. MVC Pattern (Framework-enforced)
 Spring Boot's `@Controller` + Thymeleaf + `@Service` + `@Entity` layers naturally enforce MVC.
