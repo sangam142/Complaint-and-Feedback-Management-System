@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- ============ NAVBAR FRAGMENT ============ -->
+<nav th:fragment="navbar(user)" class="navbar">
+    <div class="nav-brand">
+        <a href="/dashboard/home">📋 CFS</a>
+    </div>
+    <div class="nav-links">
+        <!-- Customer links -->
+        <span sec:authorize="hasRole('CUSTOMER')">
+            <a href="/dashboard/home">📊 My Complaints</a>
+            <a href="/customer/complaints/new">➕ New Complaint</a>
+            <a href="/customer/notifications">
+                🔔 Notifications
+                <span th:if="${unreadCount != null && unreadCount > 0}"
+                      class="badge" th:text="${unreadCount}"></span>
+            </a>
+        </span>
+
+        <!-- Admin links -->
+        <span sec:authorize="hasRole('ADMIN')">
+            <a href="/dashboard/home">📊 Dashboard</a>
+            <a href="/admin/complaints">📋 Complaints</a>
+            <a href="/admin/users">👥 Users</a>
+            <a href="/admin/feedbacks">💬 Feedbacks</a>
+            <a href="/admin/reports">📈 Reports</a>
+            <a href="/admin/notifications">
+                🔔
+                <span th:if="${unreadCount != null && unreadCount > 0}"
+                      class="badge" th:text="${unreadCount}"></span>
+            </a>
+        </span>
+
+        <!-- Staff links -->
+        <span sec:authorize="hasRole('SUPPORT_STAFF')">
+            <a href="/dashboard/home">📊 Dashboard</a>
+            <a href="/staff/complaints">📝 My Assignments</a>
+            <a href="/staff/notifications">
+                🔔
+                <span th:if="${unreadCount != null && unreadCount > 0}"
+                      class="badge" th:text="${unreadCount}"></span>
+            </a>
+        </span>
+
+        <span class="nav-user" th:if="${user != null}">
+            <span th:text="${user.fullName}">User</span>
+            <span class="role-badge" th:text="${user.role}">ROLE</span>
+        </span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" class="btn-logout">🚪 Logout</button>
+        </form>
+    </div>
+</nav>
+
+<!-- ============ ALERT FRAGMENT ============ -->
+<div th:fragment="alerts" class="alerts">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+</div>
+
+</html>

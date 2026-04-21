@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Detail — CFS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar(${user})}"></div>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<div class="container">
+    <a href="/staff/complaints" style="font-size:0.85rem;">← Back to Assignments</a>
+
+    <div class="card" style="margin-top:1rem;">
+        <div class="card-title">
+            <span th:text="${complaint.complaintId}">CMP-2026-00001</span> —
+            <span th:text="${complaint.title}">Title</span>
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <label>Status</label>
+                <p><span th:class="'status status-' + ${complaint.status}" th:text="${complaint.status}">ASSIGNED</span></p>
+            </div>
+            <div class="detail-item">
+                <label>Priority</label>
+                <p><span th:class="'priority-' + ${complaint.priority}" th:text="${complaint.priority}">MEDIUM</span></p>
+            </div>
+            <div class="detail-item">
+                <label>Category</label>
+                <p th:text="${complaint.category}">INFRASTRUCTURE</p>
+            </div>
+            <div class="detail-item">
+                <label>Customer</label>
+                <p th:text="${complaint.customer.fullName}">Customer Name</p>
+            </div>
+            <div class="detail-item">
+                <label>Filed On</label>
+                <p th:text="${#temporals.format(complaint.createdAt, 'dd-MMM-yyyy HH:mm')}">Date</p>
+            </div>
+            <div class="detail-item">
+                <label>Customer Email</label>
+                <p th:text="${complaint.customer.email}">email</p>
+            </div>
+        </div>
+
+        <!-- Decorated description (Decorator Pattern demo) -->
+        <div style="margin-top:1rem;">
+            <label style="font-size:0.75rem; text-transform:uppercase; color:#9ca3af;">Description (Decorated)</label>
+            <div class="resolution-box" th:text="${decoratedDescription}">Description</div>
+        </div>
+
+        <!-- Existing resolution/responses -->
+        <div th:if="${complaint.resolution != null}" style="margin-top:1rem;">
+            <label style="font-size:0.75rem; text-transform:uppercase; color:#9ca3af;">Resolution Log</label>
+            <div class="resolution-box" th:text="${complaint.resolution}">Resolution</div>
+        </div>
+
+        <!-- Actions based on state diagram -->
+        <div style="margin-top:1.5rem;">
+
+            <!-- Assigned -> InProgress (workStarted) -->
+            <form th:if="${complaint.status.name() == 'ASSIGNED' || complaint.status.name() == 'REOPENED'}"
+                  th:action="@{/staff/complaints/{id}/start(id=${complaint.id})}" method="post" style="margin-bottom:1rem;">
+                <button type="submit" class="btn btn-primary">▶ Start Work</button>
+            </form>
+
+            <!-- InProgress: addResponse (self-loop) -->
+            <div th:if="${complaint.status.name() == 'IN_PROGRESS'}">
+                <div class="card" style="background:#f8fafc; margin-top:0.5rem;">
+                    <div class="card-title" style="font-size:0.95rem;">Add Response</div>
+                    <form th:action="@{/staff/complaints/{id}/respond(id=${complaint.id})}" method="post">
+                        <div class="form-group">
+                            <textarea name="response" class="form-control" rows="3"
+                                      placeholder="Add an update or response..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Add Response</button>
+                    </form>
+                </div>
+
+                <!-- InProgress -> Resolved (issueFixed) -->
+                <div class="card" style="background:#f0fdf4; margin-top:1rem;">
+                    <div class="card-title" style="font-size:0.95rem;">Resolve Complaint</div>
+                    <form th:action="@{/staff/complaints/{id}/resolve(id=${complaint.id})}" method="post">
+                        <div class="form-group">
+                            <textarea name="resolution" class="form-control" rows="3"
+                                      placeholder="Final resolution summary..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">✓ Mark as Resolved</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer feedbacks for this complaint -->
+    <div class="card" th:if="${feedbacks != null && !feedbacks.isEmpty()}">
+        <div class="card-title">Customer Feedbacks</div>
+        <div th:each="f : ${feedbacks}" style="border-bottom:1px solid #f3f4f6; padding:0.75rem 0;">
+            <div style="display:flex; justify-content:space-between;">
+                <span th:text="${f.feedbackType}" style="font-weight:600;">TYPE</span>
+                <span class="stars" th:if="${f.rating != null}">
+                    <span th:each="i : ${#numbers.sequence(1, f.rating)}">★</span>
+                </span>
+            </div>
+            <p style="font-size:0.9rem; margin-top:0.25rem;" th:text="${f.content}">Content</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
