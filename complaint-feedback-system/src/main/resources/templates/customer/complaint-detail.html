@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Detail — CFS</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar(${null})}"></div>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<div class="container">
+    <a href="/dashboard/home" style="font-size:0.85rem;">← Back to Dashboard</a>
+
+    <div class="card" style="margin-top:1rem;">
+        <div class="card-title">
+            <span th:text="${complaint.complaintId}">CMP-2026-00001</span> —
+            <span th:text="${complaint.title}">Title</span>
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <label>Status</label>
+                <p><span th:class="'status status-' + ${complaint.status}" th:text="${complaint.status}">OPEN</span></p>
+            </div>
+            <div class="detail-item">
+                <label>Priority</label>
+                <p><span th:class="'priority-' + ${complaint.priority}" th:text="${complaint.priority}">MEDIUM</span></p>
+            </div>
+            <div class="detail-item">
+                <label>Category</label>
+                <p th:text="${complaint.category}">INFRASTRUCTURE</p>
+            </div>
+            <div class="detail-item">
+                <label>Filed On</label>
+                <p th:text="${#temporals.format(complaint.createdAt, 'dd-MMM-yyyy HH:mm')}">01-Jan-2026</p>
+            </div>
+            <div class="detail-item">
+                <label>Assigned To</label>
+                <p th:text="${complaint.assignedStaff != null ? complaint.assignedStaff.fullName : 'Not assigned yet'}">Staff</p>
+            </div>
+            <div class="detail-item" th:if="${complaint.resolvedAt != null}">
+                <label>Resolved On</label>
+                <p th:text="${#temporals.format(complaint.resolvedAt, 'dd-MMM-yyyy HH:mm')}">Date</p>
+            </div>
+        </div>
+
+        <div style="margin-top:1rem;">
+            <label style="font-size:0.75rem; text-transform:uppercase; color:#9ca3af;">Decorated Description (Decorator Pattern)</label>
+            <div class="resolution-box" th:text="${decoratedDescription}">Description</div>
+        </div>
+
+        <div th:if="${complaint.resolution != null}" style="margin-top:1rem;">
+            <label style="font-size:0.75rem; text-transform:uppercase; color:#9ca3af;">Resolution / Responses</label>
+            <div class="resolution-box" th:text="${complaint.resolution}">Resolution text</div>
+        </div>
+
+        <!-- Actions based on complaint state -->
+        <div style="margin-top:1.25rem;" class="action-group">
+            <!-- Resolved -> Close or Reopen -->
+            <div th:if="${complaint.status.name() == 'RESOLVED'}">
+                <form th:action="@{/customer/complaints/{id}/close(id=${complaint.id})}" method="post" class="inline-form">
+                    <button type="submit" class="btn btn-success">✓ Verify &amp; Close</button>
+                </form>
+                <form th:action="@{/customer/complaints/{id}/reopen(id=${complaint.id})}" method="post" class="inline-form">
+                    <button type="submit" class="btn btn-warning">↻ Not Satisfied — Reopen</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback form (for resolved/closed complaints) -->
+    <div class="card" th:if="${complaint.status.name() == 'RESOLVED' || complaint.status.name() == 'CLOSED'}">
+        <div class="card-title">Give Feedback</div>
+        <form th:action="@{/customer/feedback}" method="post" th:object="${feedbackDto}">
+            <input type="hidden" th:field="*{complaintId}" th:value="${complaint.id}">
+
+            <div class="form-group">
+                <label for="feedbackType">Feedback Type</label>
+                <select id="feedbackType" th:field="*{feedbackType}" class="form-control">
+                    <option th:each="ft : ${feedbackTypes}" th:value="${ft}" th:text="${ft}">TYPE</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="rating">Rating (1-5)</label>
+                <select id="rating" th:field="*{rating}" class="form-control">
+                    <option value="1">★ — Poor</option>
+                    <option value="2">★★ — Fair</option>
+                    <option value="3" selected>★★★ — Good</option>
+                    <option value="4">★★★★ — Very Good</option>
+                    <option value="5">★★★★★ — Excellent</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="content">Comments</label>
+                <textarea id="content" th:field="*{content}" class="form-control" rows="3"
+                          placeholder="Share your experience..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit Feedback</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
